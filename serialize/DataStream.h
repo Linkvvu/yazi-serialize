@@ -40,7 +40,7 @@ public:
     {
         BigEndian,
         LittleEndian
-	};
+    };
 
     DataStream();
     DataStream(const string & data);
