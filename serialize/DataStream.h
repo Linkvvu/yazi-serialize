@@ -4,6 +4,7 @@
 #include <string>
 #include <cstring>
 #include <vector>
+#include <list>
 #include <map>
 #include <set>
 #include <stdexcept>
@@ -61,6 +62,9 @@ public:
     template <typename T>
     void write(const std::vector<T> & value);
 
+    template <typename T>
+    void write(const std::list<T> & value);
+
     template <typename K, typename V>
     void write(const std::map<K, V> & value);
 
@@ -84,6 +88,9 @@ public:
 
     template <typename T>
     bool read(std::vector<T> & value);
+
+    template <typename T>
+    bool read(std::list<T> & value);
 
     template <typename K, typename V>
     bool read(std::map<K, V> & value);
@@ -116,6 +123,9 @@ public:
     template <typename T>
     DataStream & operator << (const std::vector<T> & value);
 
+    template <typename T>
+    DataStream & operator << (const std::list<T> & value);
+
     template <typename K, typename V>
     DataStream & operator << (const std::map<K, V> & value);
 
@@ -133,6 +143,9 @@ public:
 
     template <typename T>
     DataStream & operator >> (std::vector<T> & value);
+
+    template <typename T>
+    DataStream & operator >> (std::list<T> & value);
 
     template <typename K, typename V>
     DataStream & operator >> (std::map<K, V> & value);
@@ -404,6 +417,19 @@ void DataStream::write(const std::vector<T> & value)
     }
 }
 
+template <typename T>
+void DataStream::write(const std::list<T> & value)
+{
+    char type = DataType::LIST;
+    write((char *)&type, sizeof(char));
+    int len = value.size();
+    write(len);
+    for (auto it = value.begin(); it != value.end(); it++)
+    {
+        write((*it));
+    }
+}
+
 template <typename K, typename V>
 void DataStream::write(const std::map<K, V> & value)
 {
@@ -573,6 +599,26 @@ bool DataStream::read(std::vector<T> & value)
 {
     value.clear();
     if (m_buf[m_pos] != DataType::VECTOR)
+    {
+        return false;
+    }
+    ++m_pos;
+    int len;
+    read(len);
+    for (int i = 0; i < len; i++)
+    {
+        T v;
+        read(v);
+        value.push_back(v);
+    }
+    return true;
+}
+
+template <typename T>
+bool DataStream::read(std::list<T> & value)
+{
+    value.clear();
+    if (m_buf[m_pos] != DataType::LIST)
     {
         return false;
     }
@@ -807,6 +853,13 @@ DataStream & DataStream::operator >> (Serializable & value)
 
 template <typename T>
 DataStream & DataStream::operator >> (std::vector<T> & value)
+{
+    read(value);
+    return *this;
+}
+
+template <typename T>
+DataStream & DataStream::operator >> (std::list<T> & value)
 {
     read(value);
     return *this;
