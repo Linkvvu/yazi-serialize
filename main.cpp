@@ -4,8 +4,8 @@
 #include <vector>
 using namespace std;
 
-#include "DataStream.h"
-#include "Serializable.h"
+#include "serialize\DataStream.h"
+#include "serialize\Serializable.h"
 using namespace yazi::serialize;
 
 
@@ -34,10 +34,13 @@ int main()
 
     DataStream ds;
     std::set<int, std::greater<int>> s {5, 100, 0, 40, 25};
-    ds << a << s;
-    ds.save("a.out");
+    ds << s;
+    
+    std::set<int, std::greater<int>> receive;
 
-    for (const auto& i : s) {
+    ds >> receive;
+
+    for (const auto& i : receive) {
         std::cout << i << " ";
     }
     

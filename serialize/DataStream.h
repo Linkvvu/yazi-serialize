@@ -141,17 +141,17 @@ public:
     DataStream & operator >> (string & value);
     DataStream & operator >> (Serializable & value);
 
-    template <typename T>
-    DataStream & operator >> (std::vector<T> & value);
+    template<typename T, typename Alloc = std::allocator<T>>
+    DataStream & operator >> (std::vector<T, Alloc> & value);
 
-    template <typename T>
-    DataStream & operator >> (std::list<T> & value);
+    template<typename T, typename Alloc = std::allocator<T>>
+    DataStream & operator >> (std::list<T, Alloc> & value);
 
-    template <typename K, typename V>
-    DataStream & operator >> (std::map<K, V> & value);
+    template<typename K, typename V, typename Compare = std::less<K>, typename Alloc = std::allocator<std::pair<const K, V>>>
+    DataStream & operator >> (std::map<K, V, Compare, Alloc> & value);
 
-    template <typename T>
-    DataStream & operator >> (std::set<T> & value);
+    template<typename K, typename Compare = std::less<K>, typename Alloc = std::allocator<K>>
+    DataStream & operator >> (std::set<K, Compare, Alloc> & value);
 
 private:
     void reserve(int len);
@@ -336,29 +336,29 @@ DataStream & DataStream::operator << (const std::set<K, Compare, Alloc> & value)
     return *this;
 }
 
-template <typename T>
-DataStream & DataStream::operator >> (std::vector<T> & value)
+template<typename T, typename Alloc>
+DataStream & DataStream::operator >> (std::vector<T, Alloc> & value)
 {
     read(value);
     return *this;
 }
 
-template <typename T>
-DataStream & DataStream::operator >> (std::list<T> & value)
+template<typename T, typename Alloc>
+DataStream & DataStream::operator >> (std::list<T, Alloc> & value)
 {
     read(value);
     return *this;
 }
 
-template <typename K, typename V>
-DataStream & DataStream::operator >> (std::map<K, V> & value)
+template<typename K, typename V, typename Compare, typename Alloc>
+DataStream & DataStream::operator >> (std::map<K, V, Compare, Alloc> & value)
 {
     read(value);
     return *this;
 }
 
-template <typename T>
-DataStream & DataStream::operator >> (std::set<T> & value)
+template<typename K, typename Compare, typename Alloc>
+DataStream & DataStream::operator >> (std::set<K, Compare, Alloc> & value)
 {
     read(value);
     return *this;
