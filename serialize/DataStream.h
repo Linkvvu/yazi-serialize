@@ -59,17 +59,17 @@ public:
     void write(const string & value);
     void write(const Serializable & value);
  
-    template <typename T>
-    void write(const std::vector<T> & value);
+    template<typename T, typename Alloc = std::allocator<T>>
+    void write(const std::vector<T, Alloc>& val);
 
-    template <typename T>
-    void write(const std::list<T> & value);
+    template<typename T, typename Alloc = std::allocator<T>>
+    void write(const std::list<T, Alloc>& val);
 
-    template <typename K, typename V>
-    void write(const std::map<K, V> & value);
+    template<typename K, typename V, typename Compare = std::less<K>, typename Alloc = std::allocator<std::pair<const K, V>>>
+    void write(const std::map<K, V, Compare, Alloc>& val);
 
-    template <typename T>
-    void write(const std::set<T> & value);
+    template<typename K, typename Compare = std::less<K>, typename Alloc = std::allocator<K>>
+    void write(const std::set<K, Compare, Alloc>& val);
 
     template <typename T, typename ...Args>
     void write_args(const T & head, const Args&... args);
@@ -86,17 +86,17 @@ public:
     bool read(string & value);
     bool read(Serializable & value);
 
-    template <typename T>
-    bool read(std::vector<T> & value);
+    template<typename T, typename Alloc = std::allocator<T>>
+    bool read(std::vector<T, Alloc>& val);
 
-    template <typename T>
-    bool read(std::list<T> & value);
+    template<typename T, typename Alloc = std::allocator<T>>
+    bool read(std::list<T, Alloc>& val);
 
-    template <typename K, typename V>
-    bool read(std::map<K, V> & value);
+    template<typename K, typename V, typename Compare = std::less<K>, typename Alloc = std::allocator<std::pair<const K, V>>>
+    bool read(std::map<K, V, Compare, Alloc>& val);
 
-    template <typename T>
-    bool read(std::set<T> & value);
+    template<typename K, typename Compare = std::less<K>, typename Alloc = std::allocator<K>>
+    bool read(std::set<K, Compare, Alloc>& val);
 
     template <typename T, typename ...Args>
     bool read_args(T & head, Args&... args);
@@ -120,17 +120,17 @@ public:
     DataStream & operator << (const string & value);
     DataStream & operator << (const Serializable & value);
 
-    template <typename T>
-    DataStream & operator << (const std::vector<T> & value);
+    template<typename T, typename Alloc = std::allocator<T>>
+    DataStream & operator << (const std::vector<T, Alloc> & value);
 
-    template <typename T>
-    DataStream & operator << (const std::list<T> & value);
+    template<typename T, typename Alloc = std::allocator<T>>
+    DataStream & operator << (const std::list<T, Alloc> & value);
 
-    template <typename K, typename V>
-    DataStream & operator << (const std::map<K, V> & value);
+    template<typename K, typename V, typename Compare = std::less<K>, typename Alloc = std::allocator<std::pair<const K, V>>>
+    DataStream & operator << (const std::map<K, V, Compare, Alloc> & value);
 
-    template <typename T>
-    DataStream & operator << (const std::set<T> & value);
+    template<typename K, typename Compare = std::less<K>, typename Alloc = std::allocator<K>>
+    DataStream & operator << (const std::set<K, Compare, Alloc> & value);
 
     DataStream & operator >> (bool & value);
     DataStream & operator >> (char & value);
@@ -163,37 +163,34 @@ private:
     ByteOrder m_byteorder;
 };
 
-template <typename T>
-void DataStream::write(const std::vector<T> & value)
-{
+template<typename T, typename Alloc>
+void DataStream::write(const std::vector<T, Alloc>& value) {
     char type = DataType::VECTOR;
-    write((char *)&type, sizeof(char));
+    write(reinterpret_cast<char*>(&type), sizeof(char));
     int len = value.size();
     write(len);
-    for (int i = 0; i < len; i++)
-    {
-        write(value[i]);
+    for (auto& item : value) {
+        write(item);
     }
 }
 
-template <typename T>
-void DataStream::write(const std::list<T> & value)
+template<typename T, typename Alloc>
+void DataStream::write(const std::list<T, Alloc>& value)
 {
     char type = DataType::LIST;
-    write((char *)&type, sizeof(char));
+    write(reinterpret_cast<char*>(&type), sizeof(char));
     int len = value.size();
     write(len);
-    for (auto it = value.begin(); it != value.end(); it++)
-    {
-        write((*it));
+    for (auto& item : value){ 
+        write(item);
     }
 }
 
-template <typename K, typename V>
-void DataStream::write(const std::map<K, V> & value)
+template<typename K, typename V, typename Compare, typename Alloc>
+void DataStream::write(const std::map<K, V, Compare, Alloc>& value)
 {
     char type = DataType::MAP;
-    write((char *)&type, sizeof(char));
+    write(reinterpret_cast<char*>(&type), sizeof(char));
     int len = value.size();
     write(len);
     for (auto it = value.begin(); it != value.end(); it++)
@@ -203,8 +200,8 @@ void DataStream::write(const std::map<K, V> & value)
     }
 }
 
-template <typename T>
-void DataStream::write(const std::set<T> & value)
+template<typename K, typename Compare, typename Alloc>
+void DataStream::write(const std::set<K, Compare, Alloc>& value)
 {
     char type = DataType::SET;
     write((char *)&type, sizeof(char));
@@ -223,8 +220,8 @@ void DataStream::write_args(const T & head, const Args&... args)
     write_args(args...);
 }
 
-template <typename T>
-bool DataStream::read(std::vector<T> & value)
+template<typename T, typename Alloc>
+bool DataStream::read(std::vector<T, Alloc>& value)
 {
     value.clear();
     if (m_buf[m_pos] != DataType::VECTOR)
@@ -243,8 +240,8 @@ bool DataStream::read(std::vector<T> & value)
     return true;
 }
 
-template <typename T>
-bool DataStream::read(std::list<T> & value)
+template<typename T, typename Alloc>
+bool DataStream::read(std::list<T, Alloc>& value)
 {
     value.clear();
     if (m_buf[m_pos] != DataType::LIST)
@@ -263,8 +260,8 @@ bool DataStream::read(std::list<T> & value)
     return true;
 }
 
-template <typename K, typename V>
-bool DataStream::read(std::map<K, V> & value)
+template<typename K, typename V, typename Compare, typename Alloc>
+bool DataStream::read(std::map<K, V, Compare, Alloc>& value)
 {
     value.clear();
     if (m_buf[m_pos] != DataType::MAP)
@@ -286,8 +283,8 @@ bool DataStream::read(std::map<K, V> & value)
     return true;
 }
 
-template <typename T>
-bool DataStream::read(std::set<T> & value)
+template<typename K, typename Compare, typename Alloc>
+bool DataStream::read(std::set<K, Compare, Alloc>& value)
 {
     value.clear();
     if (m_buf[m_pos] != DataType::SET)
@@ -299,7 +296,7 @@ bool DataStream::read(std::set<T> & value)
     read(len);
     for (int i = 0; i < len; i++)
     {
-        T v;
+        K v;
         read(v);
         value.insert(v);
     }
@@ -307,28 +304,33 @@ bool DataStream::read(std::set<T> & value)
 }
 
 template <typename T, typename ...Args>
-bool DataStream::read_args(T & head, Args&... args)
+bool DataStream::DataStream::read_args(T & head, Args&... args)
 {
     read(head);
     return read_args(args...);
 }
 
-template <typename T>
-DataStream & DataStream::operator << (const std::vector<T> & value)
+template<typename T, typename Alloc>
+DataStream & DataStream::operator << (const std::vector<T, Alloc> & value)
 {
     write(value);
     return *this;
 }
 
-template <typename K, typename V>
-DataStream & DataStream::operator << (const std::map<K, V> & value)
-{
+template<typename T, typename Alloc>
+DataStream & DataStream::operator << (const std::list<T, Alloc> & value) {
     write(value);
     return *this;
 }
 
-template <typename T>
-DataStream & DataStream::operator << (const std::set<T> & value)
+template<typename K, typename V, typename Compare, typename Alloc>
+DataStream & DataStream::operator << (const std::map<K, V, Compare, Alloc> & value)
+{
+    write(value);
+    return *this;
+}
+template<typename K, typename Compare, typename Alloc>
+DataStream & DataStream::operator << (const std::set<K, Compare, Alloc> & value)
 {
     write(value);
     return *this;

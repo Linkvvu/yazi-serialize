@@ -1,3 +1,4 @@
+#include <algorithm>
 #include <iostream>
 #include <string>
 #include <vector>
@@ -32,8 +33,13 @@ int main()
     A a("kitty", 18);
 
     DataStream ds;
-    ds << a;
+    std::set<int, std::greater<int>> s {5, 100, 0, 40, 25};
+    ds << a << s;
     ds.save("a.out");
 
+    for (const auto& i : s) {
+        std::cout << i << " ";
+    }
+    
     return 0;
 }
