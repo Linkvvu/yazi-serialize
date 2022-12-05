@@ -4,8 +4,8 @@
 #include <vector>
 using namespace std;
 
-#include "serialize\DataStream.h"
-#include "serialize\Serializable.h"
+#include "DataStream.h"
+#include "Serializable.h"
 using namespace yazi::serialize;
 
 
