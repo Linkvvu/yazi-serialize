@@ -3,8 +3,8 @@
 #include <vector>
 using namespace std;
 
-#include "DataStream.h"
-#include "Serializable.h"
+#include <serialize/DataStream.h>
+#include <serialize/Serializable.h>
 using namespace yazi::serialize;
 
 
@@ -29,11 +29,10 @@ private:
 
 int main()
 {
-    A a("kitty", 18);
-
     DataStream ds;
-    ds << a;
-    ds.save("a.out");
+    ds << "hello" << "kitty";
+
+    std::cout << ds.size() << std::endl;
 
     return 0;
 }
