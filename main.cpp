@@ -4,8 +4,8 @@
 #include <vector>
 using namespace std;
 
-#include "DataStream.h"
-#include "Serializable.h"
+#include <serialize/DataStream.h>
+#include <serialize/Serializable.h>
 using namespace yazi::serialize;
 
 
@@ -30,19 +30,11 @@ private:
 
 int main()
 {
-    A a("kitty", 18);
-
     DataStream ds;
-    std::set<int, std::greater<int>> s {5, 100, 0, 40, 25};
-    ds << s;
-    
-    std::set<int, std::greater<int>> receive;
 
-    ds >> receive;
+    ds << "hello" << "kitty";
 
-    for (const auto& i : receive) {
-        std::cout << i << " ";
-    }
-    
+    std::cout << ds.size() << std::endl;
+
     return 0;
 }

@@ -14,9 +14,7 @@ CFLAGS = -g -O2 -Wall -Werror -Wno-unused -ldl -fPIC -std=c++11
 $(warning CFLAGS is ${CFLAGS})
 
 #找出当前目录下所有的头文件
-INCLUDE_TEMP = $(shell find ./* -type d)
-INCLUDE = $(patsubst %,-I %, $(INCLUDE_TEMP))
-$(warning INCLUDE is ${INCLUDE})
+INCLUDE = -I.
 
 SRC_MAIN = main.cpp
 OBJ_MAIN = ${SRC_MAIN:%.cpp=%.o}
